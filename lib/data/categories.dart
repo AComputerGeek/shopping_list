@@ -1,3 +1,6 @@
+// @author: Amir Armion
+// @version: V.01
+
 import 'package:flutter/material.dart';
 import 'package:shopping_list/models/category.dart';
 

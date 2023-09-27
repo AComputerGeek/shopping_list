@@ -1,3 +1,6 @@
+// @author: Amir Armion
+// @version: V.01
+
 import 'package:shopping_list/models/category.dart';
 
 class GroceryItem {
