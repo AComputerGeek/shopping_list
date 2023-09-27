@@ -1,20 +1,8 @@
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/data/categories.dart';
+import 'package:shopping_list/models/category.dart';
 
-enum Categories {
-  vegetables,
-  fruit,
-  meat,
-  dairy,
-  carbs,
-  sweets,
-  spices,
-  convenience,
-  hygiene,
-  other,
-}
-
-var groceryItems = [
+final groceryItems = [
   GroceryItem(
     'a',
     'Milk',
