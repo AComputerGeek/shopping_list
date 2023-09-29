@@ -4,6 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:shopping_list/models/grocery_item.dart';
 
 class NewItem extends StatefulWidget {
@@ -18,23 +21,53 @@ class NewItem extends StatefulWidget {
 class _NewItemState extends State<NewItem> {
   final _formKey = GlobalKey<FormState>();
 
+  var _isSending = false;
+
   var _enteredName = '';
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
 
-  void _saveItem() {
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // This .pop() navigate user to previous screen, and passing data to that screen
+      setState(() {
+        _isSending = true;
+      });
+
+      final url = Uri.https(
+        'flutter-prep-83cd0-default-rtdb.firebaseio.com',
+        'shopping-list.json',
+      );
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(
+          {
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory.title,
+          },
+        ),
+      );
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      if (!context.mounted) {
+        return;
+      }
+
       Navigator.of(context).pop(
         GroceryItem(
-          DateTime.now().toString(),
+          responseData['name'],
           _enteredName,
           _enteredQuantity,
           _selectedCategory,
         ),
-      );
+      ); // Go back to the previous screen
     }
   }
 
@@ -138,17 +171,25 @@ class _NewItemState extends State<NewItem> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      _formKey.currentState!.reset();
-                    },
+                    onPressed: (!_isSending)
+                        ? () {
+                            _formKey.currentState!.reset();
+                          }
+                        : null,
                     child: const Text('Reset'),
                   ),
                   ElevatedButton(
-                    onPressed: _saveItem,
-                    child: const Text('Add Item'),
+                    onPressed: (!_isSending) ? _saveItem : null,
+                    child: (_isSending)
+                        ? const SizedBox(
+                            height: 15,
+                            width: 15,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text('Add Item'),
                   )
                 ],
-              )
+              ),
             ],
           ),
         ),
